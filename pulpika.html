@@ -13,7 +13,7 @@
       overflow: hidden;
       font-family: 'Arial', sans-serif;
       background-color: black;
-      color: white;
+      color: rgb(61, 104, 198);
     }
     #intro {
       position: absolute;
@@ -23,7 +23,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: black;
+      background-color: rgb(109, 214, 91);
       z-index: 10;
     }
     #startBtn {
@@ -31,7 +31,7 @@
       padding: 12px 24px;
       margin-top: 20px;
       background-color: #ff4081;
-      color: white;
+      color: rgb(61, 104, 198);
       border: none;
       border-radius: 8px;
       cursor: pointer;
@@ -45,7 +45,7 @@
   <div id="intro">
     <h1>🎂 Happy Birthday, Pulpika! 🎂</h1>
     <p>Click the button below to begin your surprise!</p>
-    <button id="startBtn">Start the Show</button>
+    <button id="startBtn">Are you Pulpius Curious?</button>
   </div>
 
   <script>
@@ -53,14 +53,16 @@
     let gravity;
     let showStarted = false;
     let countdown = 5;
-    let messageShown = false;
-    let explosionSound, birthdaySong;
+    let explosionSound, birthdaySong, birthdayWhistled;
+    let frameCounter = 0;
+
+    let cyclistX = -200;
+    let planeX = window.innerWidth + 200;
 
     function preload() {
-      // Explosion sound (public domain)
-      explosionSound = new Tone.Player("https://cdn.freesound.org/previews/146/146724_2437358-lq.mp3").toDestination();
-      // Birthday song (placeholder - change to Rocky version if you find a URL)
-      birthdaySong = new Tone.Player("https://cdn.pixabay.com/audio/2023/02/01/audio_929f0a697b.mp3").toDestination();
+      explosionSound = new Tone.Player("sounds/cheer.wav").toDestination();
+      birthdaySong = new Tone.Player("sounds/birthday.mp3").toDestination();
+      birthdayWhistled = new Tone.Player("sounds/birthday-whistled.wav").toDestination();
     }
 
     function setup() {
@@ -73,6 +75,7 @@
     function draw() {
       if (!showStarted) return;
 
+      frameCounter++;
       colorMode(RGB);
       background(0, 0, 0, 25);
       colorMode(HSB);
@@ -89,19 +92,89 @@
         fireworks.push(new Firework());
       }
 
-      if (!messageShown && frameCount > 60 * 6) {
+      if (frameCounter > 360) {
         fill(60, 100, 100);
         textAlign(CENTER);
         textSize(64);
         text("HAPPY BIRTHDAY, PULPIKA!", width / 2, height / 2);
-        messageShown = true;
       }
+
+      if (frameCounter > 540) {
+        fill(0, 0, 100);
+        textSize(28);
+        text("Wishing you an unforgettable year full of laughter, love, and wild adventures.", width / 2, height / 2 + 60);
+      }
+
+      if (frameCounter > 600) {
+        drawCyclist(cyclistX, height - 100);
+        cyclistX += 3;
+      }
+
+      if (frameCounter > 700) {
+        drawPlane(planeX, 100);
+        planeX -= 4;
+      }
+
+      if (frameCounter > 800) {
+        drawCake(width / 2, height / 2 + 150);
+      }
+    }
+
+    function drawCyclist(x, y) {
+      push();
+      fill(255);
+      ellipse(x, y, 30, 30); // head
+      rect(x - 10, y, 20, 40); // body
+      ellipse(x - 15, y + 45, 20, 20); // wheel 1
+      ellipse(x + 15, y + 45, 20, 20); // wheel 2
+      pop();
+    }
+
+    function drawPlane(x, y) {
+      push();
+      fill(200);
+      rect(x, y, 100, 20); // body
+      triangle(x, y, x - 30, y + 10, x, y + 20); // tail
+      rect(x + 30, y - 10, 40, 10); // wing
+      pop();
+    }
+
+    function drawCoffeeSpill(x, y) {
+      push();
+      noStroke();
+      fill(101, 54, 24, 180);
+      beginShape();
+      for (let i = 0; i < TWO_PI; i += 0.3) {
+        let r = 30 + random(-5, 5);
+        let sx = x + cos(i) * r;
+        let sy = y + sin(i) * r;
+        vertex(sx, sy);
+      }
+      endShape(CLOSE);
+      pop();
+    }
+
+    function drawCake(x, y) {
+      push();
+      translate(x, y);
+      fill(255, 204, 0);
+      rect(-50, 0, 100, 60, 10); // cake base
+
+      fill(255);
+      rect(-40, -20, 80, 30, 10); // frosting
+
+      fill(255, 0, 0);
+      for (let i = -30; i <= 30; i += 30) {
+        rect(i, -30, 10, 20); // candles
+        fill(255, 204, 0);
+        ellipse(i + 5, -35, 10, 10); // flames
+        fill(255, 0, 0);
+      }
+      pop();
     }
 
     document.getElementById("startBtn").addEventListener("click", async () => {
       document.getElementById("intro").style.display = "none";
-
-      // Resume Tone.js context
       await Tone.start();
 
       const interval = setInterval(() => {
@@ -122,6 +195,7 @@
     function startShow() {
       explosionSound.start();
       setTimeout(() => birthdaySong.start(), 1000);
+      setTimeout(() => birthdayWhistled.start(), 1000);
       showStarted = true;
     }
 
@@ -141,7 +215,6 @@
         if (!this.exploded) {
           this.firework.applyForce(gravity);
           this.firework.update();
-
           if (this.firework.vel.y >= 0) {
             this.exploded = true;
             for (let i = 0; i < 100; i++) {
@@ -176,7 +249,6 @@
         this.firework = firework;
         this.lifespan = 255;
         this.hu = hu;
-
         this.vel = firework ? createVector(0, random(-12, -8)) : p5.Vector.random2D().mult(random(2, 10));
         this.acc = createVector(0, 0);
       }
