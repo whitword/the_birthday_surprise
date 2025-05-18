@@ -43,9 +43,10 @@
 </head>
 <body>
   <div id="intro">
-    <h1>🎂 Happy Birthday, Pulpika! 🎂</h1>
-    <p>Click the button below to begin your surprise!</p>
-    <button id="startBtn">Are you Pulpius Curious?</button>
+    <h1>Happy Birthday</h1>
+    <h1>🎂 Pulpika!!! 🎂</h1>
+    <h5>Click the button to begin your surprise!</h5>
+    <button id="startBtn">Are you Curious Pulpius?</button>
   </div>
 
   <script>
@@ -94,15 +95,21 @@
 
       if (frameCounter > 360) {
         fill(60, 100, 100);
-        textAlign(CENTER);
-        textSize(64);
-        text("HAPPY BIRTHDAY, PULPIKA!", width / 2, height / 2);
+        textAlign(CENTER, CENTER);
+        textWrap(WORD);
+        let titleSize = constrain(windowWidth / 15, 32, 64);
+        textSize(titleSize);
+        text("HAPPY BIRTHDAY, PULPIKA!", width / 4, height / 2 - 90, width * 0.5);
+
       }
 
       if (frameCounter > 540) {
         fill(0, 0, 100);
-        textSize(28);
-        text("Wishing you an unforgettable year full of laughter, love, and wild adventures.", width / 2, height / 2 + 60);
+        let messageSize = constrain(windowWidth / 25, 18, 32);
+        textSize(messageSize);
+        textAlign(CENTER, CENTER);
+        textWrap(WORD);
+        text("Wishing you an unforgettable year full of laughter, love, and wild adventures.", width / 4, height / 2 + 50, width * 0.5);
       }
 
       if (frameCounter > 600) {
@@ -277,6 +284,10 @@
         stroke(this.hu, 255, 255, this.lifespan);
         point(this.pos.x, this.pos.y);
       }
+    }
+    
+    function windowResized() {
+      resizeCanvas(windowWidth, windowHeight);
     }
   </script>
 </body>
